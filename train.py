@@ -1,12 +1,13 @@
 from sklearn.model_selection import train_test_split
 import albumentations as A
-from dataset import *
+from dataset import LandCoverDataset
 import argparse
 from torch.utils.data import Dataset, DataLoader, ConcatDataset
 import mlflow
-from UNet_model import *
-from metric import *
+from UNet_model import UNet
+from metric import accuracy
 from tqdm import tqdm
+import numpy as np
 
 def get_loader(metadata_sample, label_rgb_values, image_size, batch_size, valid_batch_size, test_batch_size, num_workers, test_num_workers, augmentation: bool):
     train_ids, test_ids = train_test_split(
