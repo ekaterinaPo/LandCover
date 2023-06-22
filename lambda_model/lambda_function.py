@@ -6,10 +6,9 @@ import numpy as np
 from PIL import Image
 from torchvision import transforms
 from UNet_model import UNet
-import io
 import os
 from io import BytesIO
-
+import base64
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -106,15 +105,8 @@ def lambda_handler(event, context):
     bucket_trigger = event['Records'][0]['s3']['bucket']['name']
     object_key = event['Records'][0]['s3']['object']['key']
 
-    # Extract image data from the API Gateway event
-    #body = json.loads(event['body'])
-    #image_data = body['image']
-    # Retrieve the uploaded image information
-    #bucket_trigger = body['bucket']
-    #object_key = body['objectKey']
-
-    print(bucket_trigger)
-    print (object_key)
+    #print(bucket_trigger)
+    #print (object_key)
 
     # Download the uploaded image from S3
     response = s3.get_object(Bucket=bucket_trigger, Key=object_key)
@@ -128,12 +120,20 @@ def lambda_handler(event, context):
     image_size = 512
     result_image = predict(upload_image, object_key, image_size)
 
-    # Save the result as a PNG image
-    #result_image = Image.fromarray(result.astype(np.uint8))
-    #result_image.save(file_path, format="PNG")
-
     # Return a response indicating the successful execution
+
+    buffered = BytesIO()
+    result_image.save(buffered, format="PNG")
+    encoded_image = base64.b64encode(buffered.getvalue()).decode('utf-8')
+
+    #return {
+    #    'statusCode': 200,
+    #    'body': json.dumps('Prediction completed successfully.')
+    #}
     return {
         'statusCode': 200,
-        'body': json.dumps('Prediction completed successfully.')
-    }
+        'body': encoded_image,
+        'headers': {
+            'Content-Type': 'image/png'
+        }
+    } 
