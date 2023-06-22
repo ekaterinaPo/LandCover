@@ -1,0 +1,42 @@
+name: CI/CD Pipeline - FastAPI
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  IMAGE_NAME: fastapi_app
+  AWS_REGION: us-east-1
+  ECR_URI: 743478656018.dkr.ecr.us-east-1.amazonaws.com/fastapi-app
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        run: |
+          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+          aws configure set region $AWS_REGION
+
+      - name: Login to AWS ECR
+        run: aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
+
+      - name: Build Docker image
+        run: docker build . -t $IMAGE_NAME
+
+      - name: Tag Docker image
+        run: docker tag $IMAGE_NAME:latest $ECR_URI:latest
+      
+      - name: Push Docker image to AWS ECR
+        run: docker push $ECR_URI:latest
+      
+      - name: Update Lambda function
+        run: aws lambda update-function-code   --function-name $IMAGE_NAME  --region $AWS_REGION --image-uri $ECR_URI:latest
