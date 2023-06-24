@@ -30,7 +30,7 @@ jobs:
         run: aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
 
       - name: Build Docker image
-        run: docker build . -t $IMAGE_NAME
+        run: docker build fastapi -t $IMAGE_NAME
 
       - name: Tag Docker image
         run: docker tag $IMAGE_NAME:latest $ECR_URI:latest
