@@ -1,5 +1,4 @@
-name: CI/CD Pipeline - FastAPI
-
+name: CI/CD Pipeline - Lambda Model
 on:
   push:
     branches:
