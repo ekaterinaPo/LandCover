@@ -5,7 +5,7 @@ on:
       - main
 
 env:
-  IMAGE_NAME: lambda-model
+  IMAGE_NAME: landcover-model
   AWS_REGION: us-east-1
   ECR_URI: 743478656018.dkr.ecr.us-east-1.amazonaws.com/fastapi-app
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
