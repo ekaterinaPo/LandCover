@@ -101,7 +101,7 @@ def read_root():
 
 
 @app.post("/predict")
-async def predict_api(file: UploadFile = File(...)):
+async def predict_api(event, context, file: UploadFile = File(...)):
     extension = file.filename.split(".")[-1] in ("jpg", "jpeg", "png")
     base_filename = os.path.splitext(file.filename)[0]
 

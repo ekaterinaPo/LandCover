@@ -30,11 +30,10 @@ def parse_args(from_jupyter = True):
         args = DotDict()
         args.image_size = 512
         args.accum_step = 5
-        #args.use_albumentation = data_augmenter
         args.batch_size = 3
         args.valid_batch_size = 2
         args.test_batch_size = 1
-        args.epochs = 4 #10
+        args.epochs = 10
         args.lr = 0.0001
         args.num_workers = 0
         args.test_num_workers = 0
@@ -52,11 +51,6 @@ def parse_args(from_jupyter = True):
             help='accumulation step: number of batches (default-10)'
         )
         
-        #parser.add_argument(
-        #    '--use_albumentation', default=data_augmenter, type=bool,
-        #    help='use_albumentation'
-        #)
-
         parser.add_argument(
             '--batch_size', type=int, default=3, metavar='N',
             help='input batch size for training (default:3)'
