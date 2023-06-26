@@ -101,7 +101,7 @@ def read_root():
 
 
 @app.post("/predict")
-async def predict_api(event, context, file: UploadFile = File(...)):
+async def predict_api(file: UploadFile = File(...)):#(event, context, file: UploadFile = File(...)):
     extension = file.filename.split(".")[-1] in ("jpg", "jpeg", "png")
     base_filename = os.path.splitext(file.filename)[0]
 
@@ -119,8 +119,9 @@ async def predict_api(event, context, file: UploadFile = File(...)):
     result_image.save(result_path, format="PNG")
     
     # Upload result image to S3
-    bucket_request = 'mlops-deploy/Landcover/requests'
-    with open(result_path, "rb") as f:
-        s3_client.upload_fileobj(f, bucket_request, result_image)
+    prefix_request = 'Landcover/requests'
+
+    s3_client.upload_file(result_path, bucket_name, 
+                          os.path.join(prefix_request, result_filename))
     
     return FileResponse(result_path)
