@@ -131,8 +131,8 @@ async def predict_api(file: UploadFile = File(...)):#(event, context, file: Uplo
     return FileResponse(result_path)
 
 
-@app.post("/show/")
-async def show_image(file: UploadFile = File(...)):
+@app.post("/response/")
+async def response_image(file: UploadFile = File(...)):
     image_path = os.path.join("images", file.filename)
     with open(image_path, "wb") as f:
         f.write(await file.read())
@@ -145,8 +145,8 @@ async def show_image(file: UploadFile = File(...)):
      
 
 
-@app.post('/image')
-async def scoring_endpoint(file: UploadFile = File(...)):
+@app.post('/json-image')
+async def dictionaary_image(file: UploadFile = File(...)):
     extension = file.filename.split(".")[-1] in ("jpg", "jpeg", "png")
     base_filename = os.path.splitext(file.filename)[0]
 
@@ -164,7 +164,7 @@ async def scoring_endpoint(file: UploadFile = File(...)):
     result_image.save(result_path, format="PNG")
     
     # Upload result image to S3
-    prefix_request = 'Landcover/requests'
+    prefix_request = 'LandCover/requests'
 
     s3_client.upload_file(result_path, bucket_name, 
                           os.path.join(prefix_request, result_filename))
