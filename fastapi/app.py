@@ -104,46 +104,6 @@ def read_root():
     return {"model": "Semantic Segmentation"}
 
 
-@app.post("/predict")
-async def predict_api(file: UploadFile = File(...)):#(event, context, file: UploadFile = File(...)):
-    extension = file.filename.split(".")[-1] in ("jpg", "jpeg", "png")
-    base_filename = os.path.splitext(file.filename)[0]
-
-    if not extension:
-        return "Image must be jpg or png format!"
-    
-    contents = await file.read()
-    image = read_imagefile(contents)
-    image_size = 512
-    result_image = predict(image, base_filename, image_size)
-    
-    modified_maskname = base_filename.replace("_sat", "_mask")
-    result_filename = f'{modified_maskname}.png'
-    result_path = os.path.join(image_dir, result_filename)
-    result_image.save(result_path, format="PNG")
-    
-    # Upload result image to S3
-    prefix_request = 'LandCover/requests'
-
-    s3_client.upload_file(result_path, bucket_name, 
-                          os.path.join(prefix_request, result_filename))
-    
-    return FileResponse(result_path)
-
-@app.post("/response/")
-async def response_image(file: UploadFile = File(...)):
-    image_path = os.path.join("images", file.filename)
-    with open(image_path, "wb") as f:
-        f.write(await file.read())
-
-    # Read the image file and encode it as base64
-    with open(image_path, "rb") as f:
-        encoded_image_base64 = base64.b64encode(f.read()).decode("utf-8")
-
-    return JSONResponse(content={"prediction": encoded_image_base64})
-     
-
-
 @app.post('/json-image')
 async def dictionaary_image(file: UploadFile = File(...)):
     extension = file.filename.split(".")[-1] in ("jpg", "jpeg", "png")
@@ -174,7 +134,7 @@ async def dictionaary_image(file: UploadFile = File(...)):
 
     return {"prediction": prediction_json}
     
-@app.post("/predict-s3")
+@app.post("/predict-s3-link")
 async def predict_api(file: UploadFile = File(...)):
     extension = file.filename.split(".")[-1] in ("jpg", "jpeg", "png")
     base_filename = os.path.splitext(file.filename)[0]
@@ -208,43 +168,6 @@ async def predict_api(file: UploadFile = File(...)):
     result_url = f"s3://{bucket_name}/{result_prefix}"
     return {"result_url": result_url}
 
-@app.post("/response-s3/")
-async def response_image(file: UploadFile = File(...)):
-    # Read the image file and encode it as base64
-    image_bytes = await file.read()
-    encoded_image_base64 = base64.b64encode(image_bytes).decode("utf-8")
 
-    return JSONResponse(content={"prediction": encoded_image_base64})
      
 
-@app.post('/json-image-s3/')
-async def dictionary_image(file: UploadFile = File(...)):
-    extension = file.filename.split(".")[-1] in ("jpg", "jpeg", "png")
-    base_filename = os.path.splitext(file.filename)[0]
-
-    if not extension:
-        return "Image must be jpg or png format!"
-
-    contents = await file.read()
-    image = read_imagefile(contents)
-    image_size = 512
-    result_image = predict(image, base_filename, image_size)
-
-    modified_maskname = base_filename.replace("_sat", "_mask")
-    result_filename = f'{modified_maskname}.png'
-
-    # Save the result image in memory as a BytesIO object
-    result_bytes_io = BytesIO()
-    result_image.save(result_bytes_io, format="PNG")
-    result_bytes_io.seek(0)
-
-    # Upload result image to S3
-    prefix_request = 'LandCover/requests'
-    s3_client.upload_fileobj(result_bytes_io, bucket_name,
-                              os.path.join(prefix_request, result_filename))
-
-    # Convert the result image to a JSON-serializable format
-    result_array = np.array(result_image)
-    prediction_json = json.dumps(result_array.tolist())
-
-    return {"prediction": prediction_json}

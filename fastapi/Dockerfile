@@ -8,7 +8,7 @@ RUN pip3 install torch==1.13.0+cpu torchvision==0.14.0+cpu --extra-index-url htt
 
 COPY app.py ${LAMBDA_TASK_ROOT}/
 COPY UNet_model.py ${LAMBDA_TASK_ROOT}/
-COPY images ${LAMBDA_TASK_ROOT}/images/
+#COPY images ${LAMBDA_TASK_ROOT}/images/
 
 #CMD ["uvicorn", "lambda_app:app", "--host", "0.0.0.0", "--port", "8080"]
 CMD ["app.handler"]
