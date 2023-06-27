@@ -23,7 +23,7 @@ s3_client = boto3.client('s3', region_name='us-east-1')
 
 bucket_name = 'mlops-deploy'
 model_prefix = 'LandCover/model/'
-image_dir = '/tmp'
+image_dir = 'images/'
 
 def reverse_one_hot(mask_img, label_rgb_values, image_size):
     mask_img_reconstructed = np.zeros((image_size, image_size, 3))
@@ -168,81 +168,6 @@ async def dictionaary_image(file: UploadFile = File(...)):
     s3_client.upload_file(result_path, bucket_name, 
                           os.path.join(prefix_request, result_filename))
     
-    # Convert the result image to a JSON-serializable format
-    result_array = np.array(result_image)
-    prediction_json = json.dumps(result_array.tolist())
-
-    return {"prediction": prediction_json}
-    
-@app.post("/predict-s3")
-async def predict_api(file: UploadFile = File(...)):
-    extension = file.filename.split(".")[-1] in ("jpg", "jpeg", "png")
-    base_filename = os.path.splitext(file.filename)[0]
-
-    if not extension:
-        return "Image must be jpg or png format!"
-    
-    contents = await file.read()
-    image = read_imagefile(contents)
-    image_size = 512
-    result_image = predict(image, base_filename, image_size)
-    
-    modified_maskname = base_filename.replace("_sat", "_mask")
-    result_filename = f'{modified_maskname}.png'
-    
-    # Convert result image to bytes
-    with BytesIO() as f:
-        result_image.save(f, format="PNG")
-        byte_im = f.getvalue()
-    
-    # Upload result image to S3
-    result_prefix = f'LandCover/results/{result_filename}'
-    s3_client.put_object(
-        Bucket=bucket_name,
-        Key=result_prefix,
-        Body=byte_im,
-        ContentType="image/png"
-    )
-    
-    # Return the S3 URL of the result image
-    result_url = f"s3://{bucket_name}/{result_prefix}"
-    return {"result_url": result_url}
-
-@app.post("/response-s3/")
-async def response_image(file: UploadFile = File(...)):
-    # Read the image file and encode it as base64
-    image_bytes = await file.read()
-    encoded_image_base64 = base64.b64encode(image_bytes).decode("utf-8")
-
-    return JSONResponse(content={"prediction": encoded_image_base64})
-     
-
-@app.post('/json-image-s3/')
-async def dictionary_image(file: UploadFile = File(...)):
-    extension = file.filename.split(".")[-1] in ("jpg", "jpeg", "png")
-    base_filename = os.path.splitext(file.filename)[0]
-
-    if not extension:
-        return "Image must be jpg or png format!"
-
-    contents = await file.read()
-    image = read_imagefile(contents)
-    image_size = 512
-    result_image = predict(image, base_filename, image_size)
-
-    modified_maskname = base_filename.replace("_sat", "_mask")
-    result_filename = f'{modified_maskname}.png'
-
-    # Save the result image in memory as a BytesIO object
-    result_bytes_io = BytesIO()
-    result_image.save(result_bytes_io, format="PNG")
-    result_bytes_io.seek(0)
-
-    # Upload result image to S3
-    prefix_request = 'LandCover/requests'
-    s3_client.upload_fileobj(result_bytes_io, bucket_name,
-                              os.path.join(prefix_request, result_filename))
-
     # Convert the result image to a JSON-serializable format
     result_array = np.array(result_image)
     prediction_json = json.dumps(result_array.tolist())
