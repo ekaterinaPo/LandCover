@@ -79,7 +79,7 @@ def predict(image, base_filename, image_size):
     byte_im = buf.getvalue()
     
     modified_filename = base_filename.replace("_sat", "_mask")
-    result_prefix = f'LandCover/results/{modified_filename}_result.png'
+    result_prefix = f'LandCover/results/{modified_filename}.png'
     
     s3_client.put_object(
         Bucket=bucket_name,
@@ -118,12 +118,12 @@ async def predict_api(file: UploadFile = File(...)):#(event, context, file: Uplo
     result_image = predict(image, base_filename, image_size)
     
     modified_maskname = base_filename.replace("_sat", "_mask")
-    result_filename = f'{modified_maskname}_result.png'
+    result_filename = f'{modified_maskname}.png'
     result_path = os.path.join(image_dir, result_filename)
     result_image.save(result_path, format="PNG")
     
     # Upload result image to S3
-    prefix_request = 'Landcover/requests'
+    prefix_request = 'LandCover/requests'
 
     s3_client.upload_file(result_path, bucket_name, 
                           os.path.join(prefix_request, result_filename))
@@ -159,7 +159,7 @@ async def dictionaary_image(file: UploadFile = File(...)):
     result_image = predict(image, base_filename, image_size)
     
     modified_maskname = base_filename.replace("_sat", "_mask")
-    result_filename = f'{modified_maskname}_result.png'
+    result_filename = f'{modified_maskname}.png'
     result_path = os.path.join(image_dir, result_filename)
     result_image.save(result_path, format="PNG")
     
