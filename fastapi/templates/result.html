@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Model Result</title>
+    <style>
+      .column {
+        float: left;
+        width: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Model Result</h1>
+    <div class="column">
+      <h2>Downloaded Image</h2>
+      <img src="{{ image_path }}" alt="Downloaded Image" width="512">
+    </div>
+    <div class="column">
+      <h2>Predicted Mask</h2>
+      <img src="data:image/png;base64,{{ mask_image_base64 }}" alt="Predicted Mask" width="512">
+    </div>
+  </body>
+</html>

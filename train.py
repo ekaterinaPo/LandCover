@@ -1,6 +1,6 @@
 from sklearn.model_selection import train_test_split
 import albumentations as A
-from dataset import LandCoverDataset
+from aws_dataset import LandCoverDataset
 import argparse
 from torch.utils.data import Dataset, DataLoader, ConcatDataset
 import mlflow

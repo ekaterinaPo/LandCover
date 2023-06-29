@@ -2,7 +2,7 @@ name: CI/CD Pipeline - Lambda Model
 on:
   push:
     branches:
-      - main
+      - not main
 
 env:
   IMAGE_NAME: landcover-model

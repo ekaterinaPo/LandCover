@@ -1,9 +1,9 @@
 import pandas as pd
-import os
-import csv
+#import os
+#import csv
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
-from PIL import Image, ImageFile
+from PIL import Image#, ImageFile
 from torchvision import transforms
 import boto3
 from io import BytesIO
@@ -117,7 +117,7 @@ class LandCoverDataset(Dataset):
 
         # Convert the image and the mask to PyTorch tensors
         img_tensor = transforms.ToTensor()(img_np)
-        mask_tensor = transforms.ToTensor()(mask_np).long()
+        #mask_tensor = transforms.ToTensor()(mask_np).long()
     
 
         # Convert the RGB mask to one-hot encoding with shape (H, W, Channels)
@@ -125,7 +125,7 @@ class LandCoverDataset(Dataset):
         mask_one_hot_tensor = transpose_after_one_hot(mask_rgb_one_hot)
 
        
-        print(f"   after transform shape: {img_tensor.shape}")
+        #print(f"   after transform shape: {img_tensor.shape}")
 
         return img_tensor, mask_one_hot_tensor
     

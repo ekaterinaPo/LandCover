@@ -9,11 +9,9 @@ import os
 from io import BytesIO
 from mangum import Mangum
 from fastapi import FastAPI, File, UploadFile
-from fastapi.responses import FileResponse
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse
 import base64
-import json
-import torchvision.transforms as transforms
+from jinja2 import Environment, FileSystemLoader
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -23,7 +21,7 @@ s3_client = boto3.client('s3', region_name='us-east-1')
 
 bucket_name = 'mlops-deploy'
 model_prefix = 'LandCover/model/'
-image_dir = 'images/'
+image_dir = '/tmp'
 
 def reverse_one_hot(mask_img, label_rgb_values, image_size):
     mask_img_reconstructed = np.zeros((image_size, image_size, 3))
@@ -98,53 +96,15 @@ def read_imagefile(file) -> Image.Image:
 app = FastAPI()
 handler = Mangum(app)
 
+# Configure Jinja2 template environment
+templates_dir = "templates"
+env = Environment(loader=FileSystemLoader(templates_dir))
 
 @app.get("/")
 def read_root():
     return {"model": "Semantic Segmentation"}
 
-
-@app.post("/predict")
-async def predict_api(file: UploadFile = File(...)):#(event, context, file: UploadFile = File(...)):
-    extension = file.filename.split(".")[-1] in ("jpg", "jpeg", "png")
-    base_filename = os.path.splitext(file.filename)[0]
-
-    if not extension:
-        return "Image must be jpg or png format!"
-    
-    contents = await file.read()
-    image = read_imagefile(contents)
-    image_size = 512
-    result_image = predict(image, base_filename, image_size)
-    
-    modified_maskname = base_filename.replace("_sat", "_mask")
-    result_filename = f'{modified_maskname}.png'
-    result_path = os.path.join(image_dir, result_filename)
-    result_image.save(result_path, format="PNG")
-    
-    # Upload result image to S3
-    prefix_request = 'LandCover/requests'
-
-    s3_client.upload_file(result_path, bucket_name, 
-                          os.path.join(prefix_request, result_filename))
-    
-    return FileResponse(result_path)
-
-@app.post("/response/")
-async def response_image(file: UploadFile = File(...)):
-    image_path = os.path.join("images", file.filename)
-    with open(image_path, "wb") as f:
-        f.write(await file.read())
-
-    # Read the image file and encode it as base64
-    with open(image_path, "rb") as f:
-        encoded_image_base64 = base64.b64encode(f.read()).decode("utf-8")
-
-    return JSONResponse(content={"prediction": encoded_image_base64})
-     
-
-
-@app.post('/json-image')
+@app.post('/json-image', response_class=HTMLResponse)
 async def dictionaary_image(file: UploadFile = File(...)):
     extension = file.filename.split(".")[-1] in ("jpg", "jpeg", "png")
     base_filename = os.path.splitext(file.filename)[0]
@@ -159,17 +119,49 @@ async def dictionaary_image(file: UploadFile = File(...)):
     
     modified_maskname = base_filename.replace("_sat", "_mask")
     result_filename = f'{modified_maskname}.png'
-    result_path = os.path.join(image_dir, result_filename)
-    result_image.save(result_path, format="PNG")
+    
+    # Convert the result image to a base64-encoded string
+    result_image_base64 = base64.b64encode(byte_im).decode("utf-8")
+
+    # Render the HTML template with the downloaded image and predicted mask
+    template = env.get_template("result.html")
+    html_content = template.render(
+        image_path=file.filename,
+        mask_image_base64=result_image_base64
+    )
+    
+    return HTMLResponse(content=html_content, status_code=200)
+
+@app.post("/predict-s3-link")
+async def predict_api(file: UploadFile = File(...)):
+    extension = file.filename.split(".")[-1] in ("jpg", "jpeg", "png")
+    base_filename = os.path.splitext(file.filename)[0]
+
+    if not extension:
+        return "Image must be jpg or png format!"
+    
+    contents = await file.read()
+    image = read_imagefile(contents)
+    image_size = 512
+    result_image = predict(image, base_filename, image_size)
+    
+    modified_maskname = base_filename.replace("_sat", "_mask")
+    result_filename = f'{modified_maskname}.png'
+    
+    # Convert result image to bytes
+    with BytesIO() as f:
+        result_image.save(f, format="PNG")
+        byte_im = f.getvalue()
     
     # Upload result image to S3
-    prefix_request = 'LandCover/requests'
-
-    s3_client.upload_file(result_path, bucket_name, 
-                          os.path.join(prefix_request, result_filename))
+    result_prefix = f'LandCover/results/{result_filename}'
+    s3_client.put_object(
+        Bucket=bucket_name,
+        Key=result_prefix,
+        Body=byte_im,
+        ContentType="image/png"
+    )
     
-    # Convert the result image to a JSON-serializable format
-    result_array = np.array(result_image)
-    prediction_json = json.dumps(result_array.tolist())
-
-    return {"prediction": prediction_json}
+    # Return the S3 URL of the result image
+    result_url = f"s3://{bucket_name}/{result_prefix}"
+    return {"result_url": result_url}

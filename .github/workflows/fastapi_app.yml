@@ -3,7 +3,7 @@ name: CI/CD Pipeline - FastAPI
 on:
   push:
     branches:
-      - main
+      - not main
 
 env:
   IMAGE_NAME: fastapi-app
