@@ -40,10 +40,7 @@ jobs:
 
       - name: Push Docker image to AWS ECR
         run: docker push $ECR_URI_TRAIN:latest
-      
-      - name: Check SSH private key permissions
-        run: ls -l ~/.ssh/id_rsa
-
+    
       - name: Start AWS EC2
         run: |
           aws ec2 start-instances --instance-ids ${{ secrets.INSTANCE_ID }}
