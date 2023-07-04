@@ -6,8 +6,8 @@ on:
 
 env:
   IMAGE_NAME: landcover-model
-  AWS_REGION: us-east-1
-  ECR_URI: 743478656018.dkr.ecr.us-east-1.amazonaws.com/landcover-model
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_URI_MODEL: 743478656018.dkr.ecr.us-east-1.amazonaws.com/landcover-model
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
@@ -26,16 +26,16 @@ jobs:
           aws configure set region $AWS_REGION
 
       - name: Login to AWS ECR
-        run: aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
+        run: aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI_MODEL
 
       - name: Build Docker image
         run: docker build lambda_model -t $IMAGE_NAME
 
       - name: Tag Docker image
-        run: docker tag $IMAGE_NAME:latest $ECR_URI:latest
+        run: docker tag $IMAGE_NAME:latest $ECR_URI_MODEL:latest
       
       - name: Push Docker image to AWS ECR
-        run: docker push $ECR_URI:latest
+        run: docker push $ECR_URI_MODEL:latest
       
       - name: Update Lambda function
         run: aws lambda update-function-code   --function-name $IMAGE_NAME  --region $AWS_REGION --image-uri $ECR_URI:latest
