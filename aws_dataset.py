@@ -34,7 +34,6 @@ def one_hot_map(mask, label_rgb_values):
     """
     Convert RGB mask to a one-hot encoding image with shape (H, W, Channels)
     with Channels equal to the number of classes.
-    
     from (2448, 2448, 3) to (2448, 2448, 7)
     """
     one_hot_map = []

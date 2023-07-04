@@ -95,7 +95,7 @@ def read_imagefile(file) -> Image.Image:
 
 app = FastAPI()
 handler = Mangum(app)
-
+#DOSNT WORK
 # Configure Jinja2 template environment
 templates_dir = "templates"
 env = Environment(loader=FileSystemLoader(templates_dir))

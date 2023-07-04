@@ -103,12 +103,10 @@ train_loader, test_loader, val_loader = get_loader(metadata_sample, label_rgb_va
 unet = UNet(in_channels = 3, out_channels = 7, features = 64)
 unet.to(device)
 
-#define optimizer
 optimizer = torch.optim.Adam([
     dict(params = unet.parameters(), lr = args.lr),
 ])
 
-#define loss function
 loss_fn = nn.CrossEntropyLoss()
 
 y, loss_val_values, accuracies, accuracies_val \
