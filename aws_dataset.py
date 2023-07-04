@@ -1,6 +1,4 @@
 import pandas as pd
-#import os
-#import csv
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
 from PIL import Image#, ImageFile
