@@ -46,7 +46,6 @@ class UpStep(nn.Module):
     
     def forward(self, x):
         x = self.up_step(x)
-        #x = torch.cat([x, concat], dim=1)
         return x
     
 class UNet(nn.Module):  
