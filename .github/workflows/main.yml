@@ -55,5 +55,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "sudo systemctl enable docker"
           ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "sudo usermod -aG docker ubuntu" 
           
+          ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI_TRAIN"
+
           ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "docker pull $ECR_URI_TRAIN:latest"
           ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "docker run -d $ECR_URI_TRAIN:latest"
