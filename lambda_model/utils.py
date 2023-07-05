@@ -131,7 +131,7 @@ def load_model(bucket = bucket_name, prefix = model_prefix):
     return model
 
 
-
+#for local use
 #def load_model(model_path: str):
 #    assert not model_path.startswith("s3://"), "Loading from S3 is not currently supported"
 #    model = UNet(in_channels = 3, out_channels = 7, features = 64)

@@ -50,5 +50,8 @@ jobs:
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/id_rsa
 
+          ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "sudo apt-get update && sudo apt-get install -y docker.io"
+          ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "sudo systemctl start docker"
+          ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "sudo systemctl enable docker"
           ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "docker pull $ECR_URI_TRAIN:latest"
           ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "docker run -d $ECR_URI_TRAIN:latest"
