@@ -56,9 +56,9 @@ class UNet(nn.Module):
         self.down_2 = DownStep(features, features*2)
         self.down_3 = DownStep(features*2, features*4)
         self.down_4 = DownStep(features*4, features*8)
-        #Bottleneck
+    
         self.centre =  DownStep(features*8, features*16)
-        #Decoder
+  
         self.up4 = UpStep(features * 16, features * 8)
         self.decoder4 = DoubleConv(features * 16, features * 8)
         self.up3 = UpStep(features * 8, features * 4)
