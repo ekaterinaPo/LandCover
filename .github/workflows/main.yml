@@ -56,9 +56,9 @@ jobs:
           ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "sudo usermod -aG docker ubuntu"
 
           ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "sudo apt-get install -y awscli"
-          ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "aws configure set aws_access_key_id <your-access-key>"
-          ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "aws configure set aws_secret_access_key <your-secret-access-key>"
-          ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "aws configure set default.region <your-region>"
+          ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID"
+          ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY"
+          ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "aws configure set default.region $AWS_REGION"
           
           ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI_TRAIN"
 
