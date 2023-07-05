@@ -114,7 +114,7 @@ class LandCoverDataset(Dataset):
 
         # Convert the image and the mask to PyTorch tensors
         img_tensor = transforms.ToTensor()(img_np)
-        #mask_tensor = transforms.ToTensor()(mask_np).long()
+        mask_tensor = transforms.ToTensor()(mask_np).long()
     
 
         # Convert the RGB mask to one-hot encoding with shape (H, W, Channels)
@@ -122,7 +122,7 @@ class LandCoverDataset(Dataset):
         mask_one_hot_tensor = transpose_after_one_hot(mask_rgb_one_hot)
 
        
-        #print(f"   after transform shape: {img_tensor.shape}")
+        print(f"   after transform shape: {img_tensor.shape}")
 
         return img_tensor, mask_one_hot_tensor
     

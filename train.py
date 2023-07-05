@@ -1,8 +1,7 @@
 from sklearn.model_selection import train_test_split
 import albumentations as A
 from aws_dataset import LandCoverDataset
-import argparse
-from torch.utils.data import Dataset, DataLoader, ConcatDataset
+from torch.utils.data import DataLoader, ConcatDataset
 import mlflow
 from UNet_model import UNet
 from metric import accuracy
@@ -113,7 +112,7 @@ def train_function(data, data_val, model, optimizer, device, loss_fn, accum_step
             else:
                 optimizer.step()
                 optimizer.zero_grad()
-                    
+            print(f"Epoch: {epoch} | Batch: {batch} | Loss: {loss:.4f}")        
             if mlflow_running:
                 mlflow.log_metric("accuracy_train", acc)
                 mlflow.log_metric("loss_train", loss.item())

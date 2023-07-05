@@ -1,0 +1,34 @@
+- name: Deploy Docker image to EC2
+  run: |
+    sudo apt-get update && sudo apt-get install -y openssh-client
+    mkdir -p ~/.ssh
+    echo -e "${{ secrets.SSH_PRIVATE_KEY }}" >> ~/.ssh/id_rsa
+    chmod 600 ~/.ssh/id_rsa
+    eval "$(ssh-agent -s)"
+    ssh-add ~/.ssh/id_rsa
+
+    ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "sudo apt-get update && sudo apt-get install -y docker.io"
+    ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "sudo systemctl start docker"
+    ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "sudo systemctl enable docker"
+    ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "sudo usermod -aG docker ubuntu" 
+
+    # Install and configure AWS CLI
+    ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "sudo apt-get install -y awscli"
+    ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "aws configure set aws_access_key_id <your-access-key>"
+    ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "aws configure set aws_secret_access_key <your-secret-access-key>"
+    ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "aws configure set default.region $AWS_REGION"
+
+    # Configure Docker to authenticate with ECR
+    ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin <your-ecr-registry>"
+
+    # Pull the Docker image
+    ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "docker pull $ECR_URI_TRAIN:latest"
+
+    # Start the Docker container
+    ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "docker run -d $ECR_URI_TRAIN:latest"
+
+    # Check the status of the running container
+    ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "docker ps"
+
+    # View the container logs
+    ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "docker logs <container-id>"

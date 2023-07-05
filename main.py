@@ -1,15 +1,12 @@
-#import mlflow
 import torch
 from aws_dataset import metadata, classes
 from train import get_loader, train_function
-#from metric import accuracy
 from UNet_model import UNet
 import argparse
 import torch.nn as nn
 import albumentations as A
 import datetime
 import io
-#from io import BytesIO
 import boto3
 
 data_augmenter = A.Compose([
@@ -95,6 +92,7 @@ def parse_args(from_jupyter = True):
 args = parse_args(from_jupyter = True)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 metadata_sample = metadata()
 label_names, label_rgb_values, select_classes = classes()
 
