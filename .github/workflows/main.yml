@@ -50,5 +50,5 @@ jobs:
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/id_rsa
 
-          ssh -o StrictHostKeyChecking=no ec2-user@$INSTANCE_IP "docker pull $ECR_URI_TRAIN:latest"
-          ssh -o StrictHostKeyChecking=no ec2-user@$INSTANCE_IP "docker run -d $ECR_URI_TRAIN:latest"
+          ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "docker pull $ECR_URI_TRAIN:latest"
+          ssh -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP "docker run -d $ECR_URI_TRAIN:latest"
