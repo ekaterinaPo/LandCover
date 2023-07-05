@@ -152,12 +152,6 @@ def reverse_one_hot_map_cg(one_hot_map, label_rgb_values):
         rgb_image[mask] = rgb_value
     return rgb_image
 
-#def reverse_one_hot(mask_img, label_rgb_values, image_size = 512):
-#    mask_img_reconstructed = np.zeros((image_size, image_size, 3))
-#    mask_img = np.argmax(mask_img, axis = 0)
-#    for idx, colour in enumerate(label_rgb_values):
-#        mask_img_reconstructed[np.equal(mask_img, idx)] = colour
-#    return mask_img_reconstructed
 
 def prediction(image, image_size = 512):
     #transform the image
