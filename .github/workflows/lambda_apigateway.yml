@@ -2,12 +2,12 @@ name: CI/CD Pipeline - Lambda Model
 on:
   push:
     branches:
-      - not main
+      - main
 
 env:
-  IMAGE_NAME: landcover-model
+  IMAGE_NAME: landcover-api
   AWS_REGION: ${{ secrets.AWS_REGION }}
-  ECR_URI_MODEL: ${{ secrets.ECR_URI_MODEL }}
+  ECR_URI_MODEL: ${{ secrets.ECR_URI_APIGATEWAY }}
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
@@ -26,16 +26,16 @@ jobs:
           aws configure set region $AWS_REGION
 
       - name: Login to AWS ECR
-        run: aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI_MODEL
+        run: aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI_APIGATEWAY
 
       - name: Build Docker image
         run: docker build lambda_model -t $IMAGE_NAME
 
       - name: Tag Docker image
-        run: docker tag $IMAGE_NAME:latest $ECR_URI_MODEL:latest
+        run: docker tag $IMAGE_NAME:latest $ECR_URI_APIGATEWAY:latest
       
       - name: Push Docker image to AWS ECR
-        run: docker push $ECR_URI_MODEL:latest
+        run: docker push $ECR_URI_APIGATEWAY:latest
       
       - name: Update Lambda function
-        run: aws lambda update-function-code   --function-name $IMAGE_NAME  --region $AWS_REGION --image-uri $ECR_URI_MODEL:latest
+        run: aws lambda update-function-code   --function-name $IMAGE_NAME  --region $AWS_REGION --image-uri $ECR_URI_APIGATEWAY:latest

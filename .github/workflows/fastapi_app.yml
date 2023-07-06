@@ -39,4 +39,4 @@ jobs:
         run: docker push $ECR_URI_API:latest
       
       - name: Update Lambda function
-        run: aws lambda update-function-code   --function-name $IMAGE_NAME  --region $AWS_REGION --image-uri $ECR_URI:latest
+        run: aws lambda update-function-code   --function-name $IMAGE_NAME  --region $AWS_REGION --image-uri $ECR_URI_API:latest

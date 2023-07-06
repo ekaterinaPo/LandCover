@@ -1,1 +1,3 @@
 extra/
+lambda_model/aws/
+lambda_api/.aws/
