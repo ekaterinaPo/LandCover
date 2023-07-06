@@ -3,7 +3,7 @@ name: CI/CD Pipeline - Model Training
 on:
   push:
     branches:
-      - main
+      - not main
 
 env:
   IMAGE_NAME: landcover-train
