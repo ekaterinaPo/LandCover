@@ -91,4 +91,3 @@ class UNet(nn.Module):
         
         return out
 
-        #model unet
