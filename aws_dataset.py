@@ -70,9 +70,9 @@ def reverse_one_hot_map_cg(one_hot_map, label_rgb_values):
 
 class LandCoverDataset(Dataset):
     def __init__(self, metadata, image_size, label_rgb_values=None, augmentation=None):
-        
-        self.image_paths = metadata['sat_image_path'].tolist()
-        self.mask_paths = metadata['mask_path'].tolist()
+        self.metadata = metadata
+        self.image_paths = self.metadata['sat_image_path'].tolist()
+        self.mask_paths = self.metadata['mask_path'].tolist()
         self.image_size =image_size
         self.label_rgb_values = label_rgb_values
         self.augmentation = augmentation
