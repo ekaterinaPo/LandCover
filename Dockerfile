@@ -2,12 +2,17 @@ FROM python:3.8
 
 WORKDIR /app
 
-COPY requirements.txt main.py aws_dataset.py UNet_model.py metric.py train.py ./
+COPY requirements.txt .
 
-RUN python -m pip install --upgrade pip && apt-get update && apt-get install -y python3-dev && apt-get clean
+RUN python -m venv venv
+ENV PATH="/app/venv/bin:$PATH"
 
-RUN pip install --no-cache-dir -r requirements.txt
-RUN pip3 install torch==1.13.0+cpu torchvision==0.14.0+cpu --extra-index-url https://download.pytorch.org/whl/cpu
+RUN /app/venv/bin/pip install --upgrade pip
+RUN apt-get update && apt-get install -y python3-dev && apt-get clean
+RUN /app/venv/bin/pip install --no-cache-dir -r requirements.txt
+RUN /app/venv/bin/pip install --no-cache-dir torch==1.13.0+cpu torchvision==0.14.0+cpu --extra-index-url https://download.pytorch.org/whl/cpu
+
+COPY main.py aws_dataset.py UNet_model.py metric.py train.py ./
 
 EXPOSE 8000
 
