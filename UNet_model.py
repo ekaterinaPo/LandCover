@@ -90,3 +90,5 @@ class UNet(nn.Module):
         out = torch.nn.functional.softmax(out, dim = 1)
         
         return out
+
+        #model unet
