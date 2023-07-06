@@ -5,6 +5,7 @@ from PIL import Image#, ImageFile
 from torchvision import transforms
 import boto3
 from io import BytesIO
+import botocore
 
 
 def download_fromS3(dir_name, file_name):
@@ -82,13 +83,28 @@ class LandCoverDataset(Dataset):
         #return self.augmented_size
         
     def __getitem__(self, index):
-        img_path = self.image_paths[index]
-        mask_path = self.mask_paths[index]
-        
+        img_path = self.metadata['sat_image_path'].iloc[index]
+        mask_path = self.metadata['mask_path'].iloc[index]
+
+        # Check if the image path exists in the S3 bucket
+        try:
+            img_obj = self.s3.head_object(Bucket='mlops-deploy', Key=img_path)
+        except botocore.exceptions.ClientError as e:
+            if e.response['Error']['Code'] == '404':
+                print(f"Image not found: {img_path}")
+                return None, None
+            else:
+                print(f"Error checking image path: {img_path}")
+                return None, None
+
         # Load the image from S3 bucket
-        img_obj = self.s3.get_object(Bucket='mlops-deploy', Key=img_path)
+        try:
+            img_obj = self.s3.get_object(Bucket='mlops-deploy', Key=img_path)
+        except Exception as e:
+            print(f"Error reading key {img_path} from bucket 'mlops-deploy': {e}")
+            return None, None
         img = Image.open(img_obj['Body'])
-        
+
         # Load the mask from S3 bucket
         mask_obj = self.s3.get_object(Bucket='mlops-deploy', Key=mask_path)
         mask_rgb = Image.open(mask_obj['Body'])
@@ -121,7 +137,6 @@ class LandCoverDataset(Dataset):
         mask_rgb_one_hot = one_hot_map(mask_np, self.label_rgb_values)
         mask_one_hot_tensor = transpose_after_one_hot(mask_rgb_one_hot)
 
-       
         print(f"   after transform shape: {img_tensor.shape}")
 
         return img_tensor, mask_one_hot_tensor
