@@ -1,11 +1,11 @@
-name: CI/CD Pipeline - Lambda Model
+name: CI/CD Pipeline - API Gateway
 on:
   push:
     branches:
       - main
 
 env:
-  IMAGE_NAME: landcover-api
+  IMAGE_NAME: landcover-apigateway
   AWS_REGION: ${{ secrets.AWS_REGION }}
   ECR_URI_MODEL: ${{ secrets.ECR_URI_APIGATEWAY }}
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
