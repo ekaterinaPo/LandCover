@@ -141,4 +141,5 @@ class LandCoverDataset(Dataset):
 
         return img_tensor, mask_one_hot_tensor
     
+    #check the loop
     
